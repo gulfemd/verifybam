@@ -12,6 +12,9 @@ int main( int argc, char** argv)
 
 	/* Set program parameters */
 	init_params( &params);
+	
+	/* Seed random number generator */
+	srand(time(NULL));
 
 	/* Parse command line arguments */	
 	return_value = parse_command_line( argc, argv, params);
@@ -33,8 +36,12 @@ int main( int argc, char** argv)
 
 	/* Read BAM files and calculate the median/avg/std of fragment sizes per library */
 	in_bam = ( bam_info*) malloc( sizeof( bam_info));
-
+	in_bam->sample_name = NULL;
 	load_bam( in_bam, params->bam_file);
+	
+	/* Initial read */	
+	read_alignment(in_bam, params);
+
 
 	/* BAM is loaded, min/max/avg/std are calculated. Now, extract FASTQs of discordants, OEAs, and orphans */
 

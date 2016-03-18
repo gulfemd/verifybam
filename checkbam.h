@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <zlib.h>
 #include <signal.h>
+#include <time.h>
 
 #include "common.h"
 #include "cmdline.h"

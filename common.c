@@ -19,7 +19,7 @@ void init_params( parameters** params)
 	*params = ( parameters*) malloc( sizeof( parameters));
 	( *params)->ref_genome = NULL;
 	( *params)->bam_file = NULL;
-	( *params)->maps_to_test = 0;
+	( *params)->maps_to_test = 100;
 	( *params)->threads = 1;
 }
 
@@ -256,7 +256,7 @@ char complement_char( char base)
 	return 'X';
 }
 
-/* Add 33 to the interger value of the qual characters to convert them to ASCII */
+/* Add 33 to the integer value of the qual characters to convert them to ASCII */
 void qual_to_ascii( char* qual)
 {
 	int i;
