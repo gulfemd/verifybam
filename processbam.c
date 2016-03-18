@@ -62,6 +62,10 @@ void read_alignment( bam_info* in_bam, parameters *params)
 	char map_chr[MAX_SEQ];
 	int map_tid;
 	int map_loc;
+	char *ref_seq;
+	int loc_len;
+	int clipped;
+	int cigar_add_len;
 
 	bam_file = in_bam->bam_file;
 	bam_header = in_bam->bam_header;
@@ -119,6 +123,10 @@ void read_alignment( bam_info* in_bam, parameters *params)
 	      hts_itr_destroy(iter);	  
 	      continue;
 	    }
+	  if (bam_aux_get(bam_alignment, "MD") == NULL){
+	      hts_itr_destroy(iter);	  
+	      continue;
+	  }
 
 	  cigar = bam_get_cigar(bam_alignment);
 	  n_cigar = bam_alignment_core.n_cigar;
@@ -134,28 +142,52 @@ void read_alignment( bam_info* in_bam, parameters *params)
 	      read[i] = next_char;
 	    }
 	  read[i] = '\0';
-	  fprintf(stdout, "%s\n", bam_get_qname(bam_alignment));
+	  //fprintf(stdout, "%s\n", bam_get_qname(bam_alignment));
 	  //fprintf(stdout, "%s\n", read);
 	  //fprintf(stdout, "%s\n",  qual);
 	  //fprintf(stdout, "n_cigar: %d\n", n_cigar);
-	  //for (i=0; i<n_cigar; i++){
-	  // fprintf(stdout, "%d\t%d\t%c\t%d\t", bam_cigar_op(cigar[i]), bam_cigar_oplen(cigar[i]), bam_cigar_opchr(cigar[i]), bam_cigar_type(cigar[i]));
-	  //}
-	  //fprintf(stdout, "\n");
+
+	  clipped=0;
+	  cigar_add_len = 0;
+
+	  for (i=0; i<n_cigar; i++){
+	    if (bam_cigar_opchr(cigar[i]) == 'S' || bam_cigar_opchr(cigar[i]) == 'H'){
+	      hts_itr_destroy(iter);
+	      clipped=1;
+	      break;
+	    }
+	    else if (bam_cigar_opchr(cigar[i]) == 'D')
+	      cigar_add_len -= bam_cigar_oplen(cigar[i]);
+	    else if (bam_cigar_opchr(cigar[i]) == 'I')
+	      cigar_add_len += bam_cigar_oplen(cigar[i]);
+	    fprintf(stdout, "%d\t%d\t%c\t%d\t", bam_cigar_op(cigar[i]), bam_cigar_oplen(cigar[i]), bam_cigar_opchr(cigar[i]), bam_cigar_type(cigar[i]));
+	  }
+	
+	  fprintf(stdout, "\n");
+	  
+	  if (clipped) continue;
 
 	  strcpy(md, bam_aux_get(bam_alignment, "MD"));
-	  //	  fprintf(stdout, "MD: %s\n", md);
+	  //fprintf(stdout, "MD: %s\n", md);
 
 	  map_tid = bam_alignment_core.tid;
 	  map_loc = bam_alignment_core.pos;
 	  strcpy(map_chr, bam_header->target_name[map_tid]);
-	  fprintf(stdout, "%s\t%d\n", map_chr, map_loc);
+	  
+	  ref_seq = faidx_fetch_seq(params->ref_fai, map_chr, map_loc-1, map_loc-2+strlen(read)+cigar_add_len, &loc_len);
+	  
+	  //fprintf(stdout, "%s\t%d\t%d\n%s\n%s\n", map_chr, map_loc, loc_len, read, ref_seq);
+	  fprintf(stdout, "%s\n%s\n", read, ref_seq);
+
+	  //	  return_value = check_map(read, ref_seq, cigar, md);
+
+	  free(ref_seq);
 	  hts_itr_destroy(iter);
 		  
 	  j++;
 	}
 }
-
+}
 
 void get_sample_name( bam_info* in_bam, char* header_text)
 {

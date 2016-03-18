@@ -8,7 +8,7 @@ int main( int argc, char** argv)
 	char username[MAX_SEQ];
 	int i;
 	int j;
-
+	FILE *refFile;
 
 	/* Set program parameters */
 	init_params( &params);
@@ -34,6 +34,14 @@ int main( int argc, char** argv)
 
 	load_chrom_properties(params);
 
+	/* read reference genome */
+	/*
+	refFile = safe_fopen(params->ref_genome, "r");
+	readSingleFasta(refFile);
+	*/
+	
+	params->ref_fai = fai_load(params->ref_genome);
+	
 	/* Read BAM files and calculate the median/avg/std of fragment sizes per library */
 	in_bam = ( bam_info*) malloc( sizeof( bam_info));
 	in_bam->sample_name = NULL;

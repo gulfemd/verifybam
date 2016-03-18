@@ -3,9 +3,9 @@ CHECKBAM_UPDATE := "September 21, 2015"
 CHECKBAM_DEBUG := 1
 BUILD_DATE := "$(shell date)"
 CC=gcc
-CFLAGS =  -O0 -g -I htslib -I vhc -I vhsc -DCHECKBAM_VERSION=\"$(CHECKBAM_VERSION)\" -DBUILD_DATE=\"$(BUILD_DATE)\" -DCHECKBAM_UPDATE=\"$(CHECKBAM_UPDATE)\" -DCHECKBAM_DEBUG=$(CHECKBAM_DEBUG)
+CFLAGS =  -O3 -g -I htslib -I vhc -I vhsc -DCHECKBAM_VERSION=\"$(CHECKBAM_VERSION)\" -DBUILD_DATE=\"$(BUILD_DATE)\" -DCHECKBAM_UPDATE=\"$(CHECKBAM_UPDATE)\" -DCHECKBAM_DEBUG=$(CHECKBAM_DEBUG)
 LDFLAGS = htslib/libhts.a -lz -lm -lpthread
-SOURCES = checkbam.c cmdline.c common.c processbam.c
+SOURCES = checkbam.c cmdline.c common.c processbam.c fastatools.c
 OBJECTS = $(SOURCES:.c=.o)
 EXECUTABLE = checkbam
 INSTALLPATH = /usr/local/bin/
