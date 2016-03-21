@@ -70,4 +70,8 @@ void* getMem( size_t size);
 void freeMem( void* ptr, size_t size);
 double getMemUsage();
 
+void del_char(char *ref, int start, int len);
+void ins_char(char *ref, int start, int len);
+void applymd(char *ref, char *md);
+
 #endif

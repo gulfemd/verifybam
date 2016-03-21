@@ -28,6 +28,7 @@ void load_chrom_properties(parameters* params)
 	FILE* fai_file;
 	int ln_count=0,i,c;
 	char filename[255],first_arg[255],sec_arg[255];
+	int return_value;
 
 	sprintf( filename, "%s.fai", ( params)->ref_genome);
 	fai_file= safe_fopen( filename, "r");
@@ -49,11 +50,10 @@ void load_chrom_properties(parameters* params)
 	params->chrom_names = ( char**) malloc( params->num_chrom * sizeof( char*));
 	for( i = 0; i < params->num_chrom; i++)
 		{
-			fscanf( fai_file, "%[^\t]\t%[^\t]%*[^\n]",first_arg,sec_arg);
-
-			params->chrom_names[i]=NULL;
-			set_str( &(params->chrom_names[i]), first_arg);
-			params->chrom_lengths[i]=atoi(sec_arg);
+		  return_value = fscanf( fai_file, "%[^\t]\t%[^\t]%*[^\n]",first_arg,sec_arg);
+		  params->chrom_names[i]=NULL;
+		  set_str( &(params->chrom_names[i]), first_arg);
+		  params->chrom_lengths[i]=atoi(sec_arg);
 		}
 	fclose(fai_file);
 }
@@ -345,4 +345,68 @@ void freeMem( void* ptr, size_t size)
 double getMemUsage()
 {
 	return memUsage / 1048576.0;
+}
+
+void del_char(char *ref, int start, int len){
+  int ref_len = strlen(ref);
+  int i;
+  for (i=start;i<start+len && i<ref_len;i++)
+    ref[i]=ref[i+len];
+  while (i < ref_len - len){
+    ref[i]=ref[i+len];
+    i++;
+  }
+  ref[i]=0;
+}
+
+void ins_char(char *ref, int start, int len){
+  int ref_len = strlen(ref);
+  int i;
+
+  for (i=ref_len+len; i>=start; i--)
+    ref[i]=ref[i-len];
+
+  ref[ref_len+len]=0;
+  ref_len = ref_len+len;
+
+  for (i=start;i<start+len && i<ref_len;i++){   
+    ref[i]='.';
+  }
+
+}
+
+//void applymd(char *ref, char *md, int n_cigar, int *cigar){
+void applymd(char *ref, char *md){
+  /* assuming Z is removed */
+  int i,j;
+  char buf[1000];
+  int oplen;
+  int refptr=0;
+
+  j=0;
+  buf[0]=0;
+  i=0;
+  //printf("md: %s\n", md);
+  while (i<strlen(md)){
+    //printf("md[%d]: %c\n", i, md[i]);
+    if (isdigit(md[i])){
+      //printf("digit %c\n", md[i]);
+      buf[j++]=md[i];
+    }
+    else {
+      buf[j]=0;
+      j=0;
+      oplen=atoi(buf);
+      refptr+=oplen;
+      //printf("buf: %s\n", buf);
+    }
+    if (md[i]=='^'){ // del. skip
+      while (isalpha(md[i])) {i++; refptr++;}
+    }
+    else if (isalpha(md[i])){
+      //  printf("changing %d:%c %d:%c\n", refptr, ref[refptr], i, md[i]);
+      ref[refptr++]=md[i];
+    }
+    i++;
+  }
 }

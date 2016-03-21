@@ -44,9 +44,12 @@ void read_alignment( bam_info* in_bam, parameters *params)
 	int return_value;
 	int i;
 	int j;
+
 	char sequence[MAX_SEQ];
 	char read[MAX_SEQ];
 	char qual[MAX_SEQ];
+	char read2[MAX_SEQ];
+
 	char next_char;
 	const uint32_t *cigar;
 	int n_cigar;
@@ -63,9 +66,11 @@ void read_alignment( bam_info* in_bam, parameters *params)
 	int map_tid;
 	int map_loc;
 	char *ref_seq;
+	char ref_seq2[MAX_SEQ];
 	int loc_len;
 	int clipped;
 	int cigar_add_len;
+	int edit_loc;
 
 	bam_file = in_bam->bam_file;
 	bam_header = in_bam->bam_header;
@@ -142,6 +147,7 @@ void read_alignment( bam_info* in_bam, parameters *params)
 	      read[i] = next_char;
 	    }
 	  read[i] = '\0';
+	  strcpy(read2, read);
 	  //fprintf(stdout, "%s\n", bam_get_qname(bam_alignment));
 	  //fprintf(stdout, "%s\n", read);
 	  //fprintf(stdout, "%s\n",  qual);
@@ -150,6 +156,7 @@ void read_alignment( bam_info* in_bam, parameters *params)
 	  clipped=0;
 	  cigar_add_len = 0;
 
+	  fprintf(stdout, "\nCIGAR: ");
 	  for (i=0; i<n_cigar; i++){
 	    if (bam_cigar_opchr(cigar[i]) == 'S' || bam_cigar_opchr(cigar[i]) == 'H'){
 	      hts_itr_destroy(iter);
@@ -157,10 +164,11 @@ void read_alignment( bam_info* in_bam, parameters *params)
 	      break;
 	    }
 	    else if (bam_cigar_opchr(cigar[i]) == 'D')
-	      cigar_add_len -= bam_cigar_oplen(cigar[i]);
-	    else if (bam_cigar_opchr(cigar[i]) == 'I')
 	      cigar_add_len += bam_cigar_oplen(cigar[i]);
-	    fprintf(stdout, "%d\t%d\t%c\t%d\t", bam_cigar_op(cigar[i]), bam_cigar_oplen(cigar[i]), bam_cigar_opchr(cigar[i]), bam_cigar_type(cigar[i]));
+	    else if (bam_cigar_opchr(cigar[i]) == 'I')
+	      cigar_add_len -= bam_cigar_oplen(cigar[i]);
+	    //fprintf(stdout, "%d\t%c\t%d\t", bam_cigar_oplen(cigar[i]), bam_cigar_opchr(cigar[i]), bam_cigar_type(cigar[i]));
+	    fprintf(stdout, "%d%c", bam_cigar_oplen(cigar[i]), bam_cigar_opchr(cigar[i]));
 	  }
 	
 	  fprintf(stdout, "\n");
@@ -168,26 +176,54 @@ void read_alignment( bam_info* in_bam, parameters *params)
 	  if (clipped) continue;
 
 	  strcpy(md, bam_aux_get(bam_alignment, "MD"));
-	  //fprintf(stdout, "MD: %s\n", md);
+	  fprintf(stdout, "MD: %s\n", md);
 
 	  map_tid = bam_alignment_core.tid;
 	  map_loc = bam_alignment_core.pos;
 	  strcpy(map_chr, bam_header->target_name[map_tid]);
 	  
-	  ref_seq = faidx_fetch_seq(params->ref_fai, map_chr, map_loc-1, map_loc-2+strlen(read)+cigar_add_len, &loc_len);
+	  ref_seq = faidx_fetch_seq(params->ref_fai, map_chr, map_loc, map_loc-1+strlen(read)+cigar_add_len, &loc_len);
+	  strcpy(ref_seq2, ref_seq);
 	  
 	  //fprintf(stdout, "%s\t%d\t%d\n%s\n%s\n", map_chr, map_loc, loc_len, read, ref_seq);
-	  fprintf(stdout, "%s\n%s\n", read, ref_seq);
+	  //fprintf(stdout, "pre\n%s\n%s\n", read, ref_seq);
 
 	  //	  return_value = check_map(read, ref_seq, cigar, md);
+	  
+	  edit_loc = 0;
+	  for (i=0; i<n_cigar; i++){
+	    if (bam_cigar_opchr(cigar[i]) == 'M')
+	      edit_loc += bam_cigar_oplen(cigar[i]);
+	    else if (bam_cigar_opchr(cigar[i]) == 'D'){
+	      del_char(ref_seq, edit_loc, bam_cigar_oplen(cigar[i]));
+	      edit_loc -= bam_cigar_oplen(cigar[i]);
+	    }
+	    else if (bam_cigar_opchr(cigar[i]) == 'I'){
+	      ins_char(ref_seq, edit_loc, bam_cigar_oplen(cigar[i]));
+	      edit_loc += bam_cigar_oplen(cigar[i]);
+	    }
+	    //fprintf(stdout, "%d\t%c\t", bam_cigar_oplen(cigar[i]), bam_cigar_opchr(c igar[i]));
+	    //fprintf(stdout, "%d\t%d\t%c\t%d\t", bam_cigar_op(cigar[i]), bam_cigar_oplen(cigar[i]), bam_cigar_opchr(cigar[i]), bam_cigar_type(cigar[i]));
+	  }
+
+	  applymd(read, md+1);
+
+	  //	  fprintf(stdout, "\npos\n%s\n%s\n", read, ref_seq);
+
+	  if (strcmp(read, ref_seq)){
+	    fprintf(stdout, "\npre\n%s\n%s\n", read2, ref_seq2);
+	    fprintf(stdout, "\npos\n%s\n%s\n", read, ref_seq);
+	  }
 
 	  free(ref_seq);
+
+	 
 	  hts_itr_destroy(iter);
 		  
 	  j++;
 	}
 }
-}
+
 
 void get_sample_name( bam_info* in_bam, char* header_text)
 {
