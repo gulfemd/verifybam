@@ -359,7 +359,7 @@ void del_char(char *ref, int start, int len){
   ref[i]=0;
 }
 
-void ins_char(char *ref, int start, int len){
+void ins_char(char *ref, char *read, int start, int len){
   int ref_len = strlen(ref);
   int i;
 
@@ -370,22 +370,50 @@ void ins_char(char *ref, int start, int len){
   ref_len = ref_len+len;
 
   for (i=start;i<start+len && i<ref_len;i++){   
-    ref[i]='.';
+    ref[i]= read[i]; //'.';
   }
 
 }
 
-//void applymd(char *ref, char *md, int n_cigar, int *cigar){
-void applymd(char *ref, char *md){
+void apply_cigar_md(char *ref, char *read, char *md, int n_cigar, const uint32_t *cigar){
+  //void applymd(char *ref, char *md){
   /* assuming Z is removed */
-  int i,j;
+  int i,j,k;
   char buf[1000];
   int oplen;
   int refptr=0;
+  int edit_loc;
+  int delcnt;
+  int thisdel;
+  int inserted;
+  int skipk;
+
+  /* TODO: when I , add to refptr*/
+
+  edit_loc = 0;
+  for (i=0; i<n_cigar; i++){
+    if (bam_cigar_opchr(cigar[i]) == 'M')
+      edit_loc += bam_cigar_oplen(cigar[i]);
+    else if (bam_cigar_opchr(cigar[i]) == 'D'){
+      del_char(ref, edit_loc, bam_cigar_oplen(cigar[i]));
+      //edit_loc -= bam_cigar_oplen(cigar[i]);
+    }
+    else if (bam_cigar_opchr(cigar[i]) == 'I'){
+      ins_char(ref, read, edit_loc, bam_cigar_oplen(cigar[i]));
+      edit_loc += bam_cigar_oplen(cigar[i]);
+    }
+    //fprintf(stdout, "%d\t%c\t", bam_cigar_oplen(cigar[i]), bam_cigar_opchr(c igar[i]));
+    //fprintf(stdout, "%d\t%d\t%c\t%d\t", bam_cigar_op(cigar[i]), bam_cigar_oplen(cigar[i]), bam_cigar_opchr(cigar[i]), bam_cigar_type(cigar[i]));
+  }
+  
+
 
   j=0;
   buf[0]=0;
   i=0;
+  delcnt=1;
+  inserted=0;
+  skipk=0;
   //printf("md: %s\n", md);
   while (i<strlen(md)){
     //printf("md[%d]: %c\n", i, md[i]);
@@ -398,15 +426,40 @@ void applymd(char *ref, char *md){
       j=0;
       oplen=atoi(buf);
       refptr+=oplen;
-      //printf("buf: %s\n", buf);
+      printf("buf: %s : %d\n", buf, oplen);
     }
+
     if (md[i]=='^'){ // del. skip
-      while (isalpha(md[i])) {i++; refptr++;}
+      //while (isalpha(md[i])) {i++; refptr++;}      
+      thisdel = 0;
+      for (k=0; k<n_cigar; k++){
+	if (bam_cigar_opchr(cigar[k]) == 'D'){
+	  thisdel++;
+	  if (thisdel == delcnt){
+	    //while (isalpha(md[i])) {i++; refptr++;}
+	    //while (isalpha(md[i])) {i++; }
+	    
+	    i+=bam_cigar_oplen(cigar[k]); 
+	    //refptr+=bam_cigar_oplen(cigar[k]); 
+	  }
+	  delcnt++;
+	}
+      }
     }
     else if (isalpha(md[i])){
-      //  printf("changing %d:%c %d:%c\n", refptr, ref[refptr], i, md[i]);
-      ref[refptr++]=md[i];
+      inserted = 0;
+      edit_loc = 0;
+      for (k=skipk; k<n_cigar; k++){
+	if (bam_cigar_opchr(cigar[k]) == 'I' && edit_loc < refptr+bam_cigar_oplen(cigar[k])){
+	  inserted += bam_cigar_oplen(cigar[k]);
+	  skipk=k+1;
+	}
+	edit_loc += bam_cigar_oplen(cigar[k]);
+      }
+      refptr += inserted;
+      printf("changing %d:%c %d:%c\n", refptr, read[refptr], i, md[i]);
+      read[refptr++]=md[i];
     }
-    i++;
+    i++; 
   }
 }

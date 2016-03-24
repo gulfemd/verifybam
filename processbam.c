@@ -70,7 +70,6 @@ void read_alignment( bam_info* in_bam, parameters *params)
 	int loc_len;
 	int clipped;
 	int cigar_add_len;
-	int edit_loc;
 
 	bam_file = in_bam->bam_file;
 	bam_header = in_bam->bam_header;
@@ -190,29 +189,14 @@ void read_alignment( bam_info* in_bam, parameters *params)
 
 	  //	  return_value = check_map(read, ref_seq, cigar, md);
 	  
-	  edit_loc = 0;
-	  for (i=0; i<n_cigar; i++){
-	    if (bam_cigar_opchr(cigar[i]) == 'M')
-	      edit_loc += bam_cigar_oplen(cigar[i]);
-	    else if (bam_cigar_opchr(cigar[i]) == 'D'){
-	      del_char(ref_seq, edit_loc, bam_cigar_oplen(cigar[i]));
-	      edit_loc -= bam_cigar_oplen(cigar[i]);
-	    }
-	    else if (bam_cigar_opchr(cigar[i]) == 'I'){
-	      ins_char(ref_seq, edit_loc, bam_cigar_oplen(cigar[i]));
-	      edit_loc += bam_cigar_oplen(cigar[i]);
-	    }
-	    //fprintf(stdout, "%d\t%c\t", bam_cigar_oplen(cigar[i]), bam_cigar_opchr(c igar[i]));
-	    //fprintf(stdout, "%d\t%d\t%c\t%d\t", bam_cigar_op(cigar[i]), bam_cigar_oplen(cigar[i]), bam_cigar_opchr(cigar[i]), bam_cigar_type(cigar[i]));
-	  }
-
-	  applymd(read, md+1);
+	  apply_cigar_md(ref_seq, read, md+1, n_cigar, cigar);
 
 	  //	  fprintf(stdout, "\npos\n%s\n%s\n", read, ref_seq);
 
 	  if (strcmp(read, ref_seq)){
 	    fprintf(stdout, "\npre\n%s\n%s\n", read2, ref_seq2);
 	    fprintf(stdout, "\npos\n%s\n%s\n", read, ref_seq);
+	    return;
 	  }
 
 	  free(ref_seq);

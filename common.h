@@ -71,7 +71,8 @@ void freeMem( void* ptr, size_t size);
 double getMemUsage();
 
 void del_char(char *ref, int start, int len);
-void ins_char(char *ref, int start, int len);
-void applymd(char *ref, char *md);
+void ins_char(char *ref, char *, int start, int len);
+//void applymd(char *ref, char *md);
+void apply_cigar_md(char *ref, char *read, char *md, int n_cigar, const uint32_t *cigar);
 
 #endif
