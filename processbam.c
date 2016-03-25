@@ -198,8 +198,9 @@ void read_alignment( bam_info* in_bam, parameters *params)
 	    fprintf(stdout, "\npos\n%s\n%s\n", read, ref_seq);
 	    return;
 	  }
-
-	  free(ref_seq);
+	  
+	  if (ref_seq!=NULL)
+	    free(ref_seq);
 
 	 
 	  hts_itr_destroy(iter);

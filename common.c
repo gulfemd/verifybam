@@ -440,9 +440,9 @@ void apply_cigar_md(char *ref, char *read, char *md, int n_cigar, const uint32_t
 	    //while (isalpha(md[i])) {i++; }
 	    
 	    i+=bam_cigar_oplen(cigar[k]); 
+		delcnt++; break;
 	    //refptr+=bam_cigar_oplen(cigar[k]); 
 	  }
-	  delcnt++;
 	}
       }
     }
@@ -450,7 +450,8 @@ void apply_cigar_md(char *ref, char *read, char *md, int n_cigar, const uint32_t
       inserted = 0;
       edit_loc = 0;
       for (k=skipk; k<n_cigar; k++){
-	if (bam_cigar_opchr(cigar[k]) == 'I' && edit_loc < refptr+bam_cigar_oplen(cigar[k])){
+	//if (bam_cigar_opchr(cigar[k]) == 'I' && edit_loc <= refptr+bam_cigar_oplen(cigar[k])){
+	if (bam_cigar_opchr(cigar[k]) == 'I' && edit_loc <= refptr){
 	  inserted += bam_cigar_oplen(cigar[k]);
 	  skipk=k+1;
 	}
