@@ -26,7 +26,7 @@ typedef struct _bam_info
 /* Function Prototypes */
 void load_bam( bam_info* in_bam, char* path);
 void read_alignment( bam_info* in_bam, parameters *params);
-void print_bam( bam_info* in_bam);
+
 
 
 /* BAM Utility functions */

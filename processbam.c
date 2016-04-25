@@ -243,15 +243,3 @@ void get_sample_name( bam_info* in_bam, char* header_text)
 
 
 		
-void print_bam( bam_info* in_bam)
-{
-	/*printf( "Number of Chromosomes: %d\n", in_bam->num_chrom);
-
-	int i;
-	for( i = 0; i < in_bam->num_chrom; i++)
-	{
-		printf( "Chromosome Name: %s\n", ( in_bam->chrom_names)[i]);
-		printf( "Length of the Chromosome: %d\n", ( in_bam->chrom_lengths)[i]);
-	}*/
-}
-

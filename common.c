@@ -388,7 +388,6 @@ void apply_cigar_md(char *ref, char *read, char *md, int n_cigar, const uint32_t
   int inserted;
   int skipk;
 
-  /* TODO: when I , add to refptr*/
 
   edit_loc = 0;
   for (i=0; i<n_cigar; i++){
