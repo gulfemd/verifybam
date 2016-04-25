@@ -1,13 +1,13 @@
-CHECKBAM_VERSION := "0.1-alpha"
-CHECKBAM_UPDATE := "September 21, 2015"
-CHECKBAM_DEBUG := 1
+VERIFYBAM_VERSION := "0.1-alpha"
+VERIFYBAM_UPDATE := "September 21, 2015"
+VERIFYBAM_DEBUG := 1
 BUILD_DATE := "$(shell date)"
 CC=gcc
-CFLAGS =  -O3 -g -I htslib -DCHECKBAM_VERSION=\"$(CHECKBAM_VERSION)\" -DBUILD_DATE=\"$(BUILD_DATE)\" -DCHECKBAM_UPDATE=\"$(CHECKBAM_UPDATE)\" -DCHECKBAM_DEBUG=$(CHECKBAM_DEBUG)
+CFLAGS =  -O3 -g -I htslib -DVERIFYBAM_VERSION=\"$(VERIFYBAM_VERSION)\" -DBUILD_DATE=\"$(BUILD_DATE)\" -DVERIFYBAM_UPDATE=\"$(VERIFYBAM_UPDATE)\" -DVERIFYBAM_DEBUG=$(VERIFYBAM_DEBUG)
 LDFLAGS = htslib/libhts.a -lz -lm -lpthread
-SOURCES = checkbam.c cmdline.c common.c processbam.c fastatools.c
+SOURCES = verifybam.c cmdline.c common.c processbam.c fastatools.c
 OBJECTS = $(SOURCES:.c=.o)
-EXECUTABLE = checkbam
+EXECUTABLE = verifybam
 INSTALLPATH = /usr/local/bin/
 
 all: $(SOURCES) $(EXECUTABLE)
@@ -20,10 +20,10 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) -c $(CFLAGS) $< -o $@
 
 clean:
-	rm -f $(EXECUTABLE) *.o *~
+	rm -f $(EXECUTABLE) *.o *~ \#*
 
 libs:
 	make -C htslib
 
 install:
-	cp checkbam $(INSTALLPATH)
+	cp verifybam $(INSTALLPATH)

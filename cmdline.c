@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "checkbam.h"
+#include "verifybam.h"
 #include "cmdline.h"
 
 
@@ -53,8 +53,8 @@ int parse_command_line( int argc, char** argv, parameters* params)
 			break;
 
 			case 'v':
-				fprintf( stderr, "\nCHECKBAM: Toolkit for Automated and Rapid DIscovery of Structural variants.\n");
-				fprintf( stderr, "Version %s\n\tLast update: %s, build date: %s\n\n", CHECKBAM_VERSION, CHECKBAM_UPDATE, BUILD_DATE);
+				fprintf( stderr, "\nVERIFYBAM: Toolkit for Automated and Rapid DIscovery of Structural variants.\n");
+				fprintf( stderr, "Version %s\n\tLast update: %s, build date: %s\n\n", VERIFYBAM_VERSION, VERIFYBAM_UPDATE, BUILD_DATE);
 				fprintf( stderr, "It is bigger on the inside!\n\n");
 				return 0;
 			break; 
@@ -66,21 +66,21 @@ int parse_command_line( int argc, char** argv, parameters* params)
 
 	if( params->bam_file == NULL)
 	{
-	        fprintf( stderr, "[CHECKBAM CMDLINE ERROR] Please enter an input BAM file using the --input option.\n");
+	        fprintf( stderr, "[VERIFYBAM CMDLINE ERROR] Please enter an input BAM file using the --input option.\n");
 		return EXIT_PARAM_ERROR;
 	}
 
 	/* check if --ref   is invoked */
 	if( params->ref_genome == NULL)
 	{
-		fprintf( stderr, "[CHECKBAM CMDLINE ERROR] Please enter reference genome file (FASTA) using the --ref option.\n");
+		fprintf( stderr, "[VERIFYBAM CMDLINE ERROR] Please enter reference genome file (FASTA) using the --ref option.\n");
 		return EXIT_PARAM_ERROR;
 	}
 
 	/* check if threads>0 */
 	if( params->threads <= 0)
 	{
-		fprintf( stderr, "[CHECKBAM CMDLINE WARNING] Invalid number of threads was entered (%d). Resetted to 1.\n", params->threads);
+		fprintf( stderr, "[VERIFYBAM CMDLINE WARNING] Invalid number of threads was entered (%d). Resetted to 1.\n", params->threads);
 		params->threads = 1;
 	}
 
@@ -90,8 +90,8 @@ int parse_command_line( int argc, char** argv, parameters* params)
 
 void print_help( void)
 {  
-	fprintf( stdout, "\nCHECKBAM: Toolkit for Automated and Rapid DIscovery of Structural variants.\n");
-	fprintf( stdout, "Version %s\n\tLast update: %s, build date: %s\n\n", CHECKBAM_VERSION, CHECKBAM_UPDATE, BUILD_DATE);	
+	fprintf( stdout, "\nVERIFYBAM: Toolkit for Automated and Rapid DIscovery of Structural variants.\n");
+	fprintf( stdout, "Version %s\n\tLast update: %s, build date: %s\n\n", VERIFYBAM_VERSION, VERIFYBAM_UPDATE, BUILD_DATE);	
 	fprintf( stdout, "\t--bamlist   [bamlist file] : A text file that lists input BAM files one file per line.\n");
 	fprintf( stdout, "\t--input [BAM files]        : Input files in sorted and indexed BAM format. You can pass multiple BAMs using multiple --input parameters.\n");
 	fprintf( stdout, "\t--out   [output prefix]    : Prefix for the output file names.\n");
