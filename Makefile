@@ -5,7 +5,8 @@ BUILD_DATE := "$(shell date)"
 CC=gcc
 CFLAGS =  -O3 -g -I htslib -DVERIFYBAM_VERSION=\"$(VERIFYBAM_VERSION)\" -DBUILD_DATE=\"$(BUILD_DATE)\" -DVERIFYBAM_UPDATE=\"$(VERIFYBAM_UPDATE)\" -DVERIFYBAM_DEBUG=$(VERIFYBAM_DEBUG)
 LDFLAGS = htslib/libhts.a -lz -lm -lpthread
-SOURCES = verifybam.c cmdline.c common.c processbam.c fastatools.c
+SOURCES = verifybam.c cmdline.c common.c processbam.c 
+# fastatools.c
 OBJECTS = $(SOURCES:.c=.o)
 EXECUTABLE = verifybam
 INSTALLPATH = /usr/local/bin/

@@ -12,7 +12,7 @@
 #include "common.h"
 #include "cmdline.h"
 #include "processbam.h"
-#include "fastatools.h"
+//#include "fastatools.h"
 
 
 #endif
